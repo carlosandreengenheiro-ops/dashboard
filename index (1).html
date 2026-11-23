@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel de Resultados</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,500&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#2A1F23;--wine:#4A2830;--card:#382930;--gold:#D9C08F;--cream:#FAF6F0;--mut:#b9a9a0;--line:#5a3f46;--ok:#8fd3a4}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--cream);font-family:Poppins,system-ui,sans-serif;font-size:14px;line-height:1.45}
+h1,h2{font-family:'Playfair Display',Georgia,serif;font-weight:600;margin:0}
+button,input,textarea{font:inherit;color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.sub{color:var(--mut);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+header{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:flex-end;margin-bottom:16px}
+header h1{font-size:30px}
+header h1 i{color:var(--gold);font-weight:500}
+.nome-in{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-family:'Playfair Display',serif;font-size:22px;width:100%;max-width:420px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.kpi span{color:var(--mut);font-size:12px}
+.kpi b{display:block;font-family:'Playfair Display',serif;font-size:28px;color:var(--gold);margin:2px 0}
+.kpi small{color:var(--mut);font-size:12px}
+.kpi.big{background:var(--wine);border-color:var(--gold)}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+.sec h2{font-size:20px;margin-bottom:10px}
+.chart{display:flex;align-items:flex-end;gap:14px;height:200px;overflow-x:auto;padding-top:8px;border-bottom:1px solid var(--line)}
+.grp{flex:1;min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.bars{display:flex;align-items:flex-end;gap:5px;height:100%;width:100%;justify-content:center}
+.bar{width:44%;max-width:36px;border-radius:5px 5px 0 0;min-height:2px}
+.bi{background:var(--gold)}.br{background:var(--cream)}
+.lbls{display:flex;gap:14px;overflow-x:auto;margin-top:6px}
+.lbls div{flex:1;min-width:70px;text-align:center;color:var(--mut);font-size:12px}
+.leg{display:flex;gap:16px;margin-top:10px;color:var(--mut);font-size:12px}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th{color:var(--mut);font-weight:500;font-size:12px;text-align:left;padding:6px 6px;border-bottom:1px solid var(--line)}
+td{padding:5px 6px;border-bottom:1px solid var(--line)}
+td input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+td.v{white-space:nowrap}
+.btn{background:var(--gold);color:#2A1F23;border:0;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+.btn.sm{padding:5px 9px;font-size:12px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;min-height:90px}
+.nota{white-space:pre-wrap;color:var(--cream);border-left:4px solid var(--gold);padding:4px 0 4px 14px}
+.note{color:var(--mut);font-size:12px;margin-top:10px}
+.linkbox{display:none;margin-top:12px}
+.linkbox.on{display:block}
+.linkbox input{width:100%;background:var(--bg);border:1px solid var(--gold);border-radius:8px;padding:9px 10px}
+.view .adm{display:none}
+.foot{color:var(--mut);font-size:12px;text-align:center;padding:8px 0 16px;letter-spacing:.08em}
+@media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap" id="root">
+<header>
+<div>
+<div class="sub">Painel de resultados · <span id="per"></span></div>
+<h1 id="h1view" style="display:none"></h1>
+<input class="nome-in adm" id="nome" aria-label="Nome do cliente" placeholder="Nome do cliente">
+</div>
+<div class="sub">OAs Agência</div>
+</header>
+
+<div class="kpis">
+<div class="kpi big"><span>Retorno</span><b id="k-ret">—</b><small id="k-ret-s">receita ÷ investimento</small></div>
+<div class="kpi"><span>Investido em anúncios</span><b id="k-inv">—</b><small>soma de todos os períodos</small></div>
+<div class="kpi"><span>Receita gerada</span><b id="k-rec">—</b><small>informada pelo cliente</small></div>
+<div class="kpi"><span>Conversas no WhatsApp</span><b id="k-conv">—</b><small id="k-cpc">custo por conversa: —</small></div>
+<div class="kpi"><span>Clientes fechados</span><b id="k-vend">—</b><small id="k-cpv">custo por cliente: —</small></div>
+<div class="kpi"><span>Conversas que viraram cliente</span><b id="k-tx">—</b><small>fechados ÷ conversas</small></div>
+</div>
+
+<div class="sec">
+<h2>Investimento e receita por período</h2>
+<div class="chart" id="chart"></div>
+<div class="lbls" id="lbls"></div>
+<div class="leg"><span><i style="background:var(--gold)"></i>Investimento</span><span><i style="background:var(--cream)"></i>Receita</span></div>
+</div>
+
+<div class="sec">
+<h2>Números por período</h2>
+<div class="tw"><table id="tb"></table></div>
+<div class="acts adm"><button class="btn ghost sm" id="add">+ Adicionar período</button></div>
+</div>
+
+<div class="sec">
+<h2>Resumo da agência</h2>
+<p class="nota" id="nota-v" style="display:none"></p>
+<textarea class="adm" id="nota" placeholder="O que aconteceu no período, o que funcionou e o que vamos ajustar."></textarea>
+</div>
+
+<div class="sec adm">
+<h2>Enviar ao cliente</h2>
+<p class="note" style="margin-top:0">O link leva os números dentro dele e mostra o painel só para leitura. Quem tiver o link vê esses números. Gere um novo link a cada atualização.</p>
+<div class="acts"><button class="btn" id="gerar">Gerar link do cliente</button><button class="btn ghost" id="limpar" style="display:none">Apagar exemplo</button></div>
+<div class="linkbox" id="lb"><input id="lk" readonly aria-label="Link do cliente"><div class="acts"><button class="btn sm" id="cp">Copiar link</button><span class="note" id="cpm"></span></div></div>
+<p class="note">Os números que você digita ficam salvos só neste navegador.</p>
+</div>
+
+<div class="foot">OAs AGÊNCIA · @oandresantos.s</div>
+</div>
+
+<script>
+(function(){
+var KEY='painel_cliente_v1';
+var S={nome:'Cliente Exemplo',nota:'',ex:1,l:[
+ {p:'Semana 1',inv:'60',conv:'14',vend:'1',rec:'180'},
+ {p:'Semana 2',inv:'60',conv:'18',vend:'2',rec:'420'},
+ {p:'Semana 3',inv:'80',conv:'25',vend:'3',rec:'610'},
+ {p:'Semana 4',inv:'80',conv:'22',vend:'3',rec:'540'}
+]};
+var VIEW=false;
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
+function n(v){var x=parseFloat(String(v==null?'':v).replace(/\./g,'').replace(',','.'));if(isNaN(x)){x=parseFloat(String(v).replace(',','.'))}return isNaN(x)?0:x}
+function brl(x){return 'R$ '+x.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function int(x){return Math.round(x).toLocaleString('pt-BR')}
+function enc(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function dec(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return JSON.parse(decodeURIComponent(escape(atob(s))))}
+function load(){
+ var h=location.hash||'';
+ if(h.indexOf('#d=')===0){try{var d=dec(h.slice(3));if(d&&d.l){S=d;VIEW=true;return}}catch(e){}}
+ try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(o&&o.l)S=o}}catch(e){}
+}
+function save(){if(VIEW)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function totals(){
+ var t={inv:0,conv:0,vend:0,rec:0};
+ S.l.forEach(function(r){t.inv+=n(r.inv);t.conv+=n(r.conv);t.vend+=n(r.vend);t.rec+=n(r.rec)});
+ return t;
+}
+function derived(){
+ var t=totals();
+ $('k-inv').textContent=brl(t.inv);
+ $('k-rec').textContent=brl(t.rec);
+ $('k-conv').textContent=int(t.conv);
+ $('k-vend').textContent=int(t.vend);
+ if(t.inv>0&&t.rec>0){var r=t.rec/t.inv;$('k-ret').textContent=r.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'x';$('k-ret-s').textContent='R$ '+r.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' de receita para cada R$ 1 investido'}
+ else{$('k-ret').textContent='—';$('k-ret-s').textContent='receita ÷ investimento'}
+ $('k-cpc').textContent='custo por conversa: '+(t.conv>0&&t.inv>0?brl(t.inv/t.conv):'—');
+ $('k-cpv').textContent='custo por cliente: '+(t.vend>0&&t.inv>0?brl(t.inv/t.vend):'—');
+ $('k-tx').textContent=t.conv>0?Math.round(t.vend/t.conv*100)+'%':'—';
+ chart();
+ $('per').textContent=S.l.length?S.l[0].p+' a '+S.l[S.l.length-1].p:'';
+}
+function chart(){
+ var m=0;S.l.forEach(function(r){m=Math.max(m,n(r.inv),n(r.rec))});
+ var h='',l='';
+ S.l.forEach(function(r){
+  var a=m?n(r.inv)/m*100:0,b=m?n(r.rec)/m*100:0;
+  h+='<div class="grp"><div class="bars"><div class="bar bi" style="height:'+a+'%" title="Investimento: '+brl(n(r.inv))+'"></div><div class="bar br" style="height:'+b+'%" title="Receita: '+brl(n(r.rec))+'"></div></div></div>';
+  l+='<div>'+esc(r.p)+'</div>';
+ });
+ $('chart').innerHTML=h;$('lbls').innerHTML=l;
+}
+function table(){
+ var head='<tr><th>Período</th><th>Investimento (R$)</th><th>Conversas</th><th>Clientes fechados</th><th>Receita (R$)</th>'+(VIEW?'':'<th></th>')+'</tr>';
+ var rows=S.l.map(function(r,i){
+  if(VIEW)return '<tr><td>'+esc(r.p)+'</td><td class="v">'+brl(n(r.inv))+'</td><td>'+int(n(r.conv))+'</td><td>'+int(n(r.vend))+'</td><td class="v">'+brl(n(r.rec))+'</td></tr>';
+  return '<tr><td><input data-i="'+i+'" data-k="p" value="'+esc(r.p)+'" aria-label="Período"></td><td><input data-i="'+i+'" data-k="inv" inputmode="decimal" value="'+esc(r.inv)+'" aria-label="Investimento"></td><td><input data-i="'+i+'" data-k="conv" inputmode="numeric" value="'+esc(r.conv)+'" aria-label="Conversas"></td><td><input data-i="'+i+'" data-k="vend" inputmode="numeric" value="'+esc(r.vend)+'" aria-label="Clientes fechados"></td><td><input data-i="'+i+'" data-k="rec" inputmode="decimal" value="'+esc(r.rec)+'" aria-label="Receita"></td><td><button class="btn ghost sm" data-del="'+i+'">Remover</button></td></tr>';
+ }).join('');
+ $('tb').innerHTML=head+rows;
+}
+function view(){
+ document.getElementById('root').className='wrap'+(VIEW?' view':'');
+ if(VIEW){
+  $('h1view').style.display='';$('h1view').innerHTML=esc(S.nome)+' · <i>resultados</i>';
+  $('nota-v').style.display=S.nota?'':'none';$('nota-v').textContent=S.nota||'';
+  document.title='Resultados · '+S.nome;
+ }else{
+  $('nome').value=S.nome;$('nota').value=S.nota||'';
+  $('limpar').style.display=S.ex?'':'none';
+ }
+ table();derived();
+}
+document.addEventListener('input',function(e){
+ var t=e.target;
+ if(t.id==='nome'){S.nome=t.value;save();return}
+ if(t.id==='nota'){S.nota=t.value;save();return}
+ if(t.getAttribute&&t.getAttribute('data-k')){S.l[+t.getAttribute('data-i')][t.getAttribute('data-k')]=t.value;S.ex=0;save();derived()}
+});
+document.addEventListener('click',function(e){
+ var t=e.target;
+ var d=t.getAttribute&&t.getAttribute('data-del');
+ if(d!==null&&d!==undefined&&t.hasAttribute('data-del')){S.l.splice(+d,1);S.ex=0;save();view();return}
+ if(t.id==='add'){S.l.push({p:'Período '+(S.l.length+1),inv:'',conv:'',vend:'',rec:''});S.ex=0;save();view();return}
+ if(t.id==='limpar'){if(confirm('Apagar os números de exemplo?')){S={nome:'',nota:'',ex:0,l:[{p:'Semana 1',inv:'',conv:'',vend:'',rec:''}]};save();view()}return}
+ if(t.id==='gerar'){
+  var u=location.href.split('#')[0]+'#d='+enc({nome:S.nome,nota:S.nota,l:S.l});
+  $('lk').value=u;$('lb').className='linkbox on';$('cpm').textContent='';$('lk').select();return}
+ if(t.id==='cp'){
+  var v=$('lk').value;$('lk').select();
+  function ok(){$('cpm').textContent='Link copiado.'}
+  function no(){$('cpm').textContent='Selecione o link e copie.'}
+  try{navigator.clipboard.writeText(v).then(ok,no)}catch(x){no()}
+ }
+});
+load();view();
+})();
+</script>
+</body>
+</html>
